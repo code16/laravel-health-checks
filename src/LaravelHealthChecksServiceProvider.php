@@ -16,9 +16,6 @@ class LaravelHealthChecksServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('laravel-health-checks')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_laravel_health_checks_table');
+            ->name('laravel-health-checks');
     }
 }
