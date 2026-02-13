@@ -21,6 +21,7 @@
         "illuminate/contracts": "^11.0||^12.0"
     },
     "require-dev": {
+        "code16/pint-config": "^1.2",
         "laravel/pint": "^1.14",
         "nunomaduro/collision": "^8.8",
         "orchestra/testbench": "^10.0.0||^9.0.0",
@@ -42,7 +43,10 @@
         }
     },
     "scripts": {
-        "post-autoload-dump": "@composer run prepare",
+        "post-autoload-dump": [
+            "@composer run prepare",
+            "@php vendor/bin/pint-config install"
+        ],
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
