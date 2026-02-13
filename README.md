@@ -6,24 +6,15 @@ You can install the package via composer:
 composer require code16/laravel-health-checks
 ```
 
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="laravel-health-checks-config"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
 ## Usage
 
+Declare this check in your `HealthCheckServiceProvider`:
 ```php
-$laravelHealthChecks = new Code16\LaravelHealthChecks();
-echo $laravelHealthChecks->echoPhrase('Hello, Code16!');
+PhpUploadConfigCheck::new()
+    // in Mb, If you want to check GB values, use number * 1024 (i.e: 8 * 1024 will match a 8G config value)
+    ->setPostMaxSizeInMb(8) 
+    ->setMaxUploadSizeInMb(200)
+    ->allowGreaterValue(),
 ```
 
 ## Testing
