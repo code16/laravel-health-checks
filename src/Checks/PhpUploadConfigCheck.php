@@ -51,7 +51,7 @@ class PhpUploadConfigCheck extends Check {
         return $result->meta($meta);
     }
 
-    protected function checkUploadMaxSize() {
+    protected function checkUploadMaxSize(): Result {
         $uploadMaxFileSize = $this->phpIni->get('upload_max_filesize');
         $parsedUploadMaxFileSize = $this->parseFileSizeToMb($uploadMaxFileSize);
 
@@ -77,7 +77,7 @@ class PhpUploadConfigCheck extends Check {
     }
 
 
-    protected function checkPostMaxSize() {
+    protected function checkPostMaxSize(): Result {
         $postMaxSize = $this->phpIni->get('post_max_size');
         $parsedPostMaxSize = $this->parseFileSizeToMb($postMaxSize);
 
