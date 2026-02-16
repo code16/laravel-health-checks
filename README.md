@@ -14,7 +14,8 @@ PhpUploadConfigCheck::new()
     // in Mb, If you want to check GB values, use number * 1024 (i.e: 8 * 1024 will match a 8G config value)
     ->setPostMaxSizeInMb(8) 
     ->setMaxUploadSizeInMb(200)
-    ->allowGreaterValue(),
+    // By default, the check will allow a greater value, if you want a strict check, you'll have to set ->allowGreaterValue(allow: false)
+    ->allowGreaterValue(allow: true, max: 200), // Define a maximum value
 ```
 
 ## Testing
