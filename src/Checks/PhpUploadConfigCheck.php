@@ -7,14 +7,16 @@ use Code16\LaravelHealthChecks\Support\PhpIni;
 use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Result;
 
-class PhpUploadConfigCheck extends Check {
+class PhpUploadConfigCheck extends Check
+{
     use HasFileSizeParsing;
 
     protected int $maxUploadSizeInMb = 32;
 
     protected ?int $postMaxSizeInMb = null;
 
-    protected bool $allowGreaterValue = false;
+    protected bool $allowGreaterValue = true;
+    protected ?int $maxValueInMb = null;
 
     protected PhpIni $phpIni;
 
@@ -51,21 +53,28 @@ class PhpUploadConfigCheck extends Check {
         return $result->meta($meta);
     }
 
-    protected function checkUploadMaxSize(): Result {
+    protected function checkUploadMaxSize(): Result
+    {
         $uploadMaxFileSize = $this->phpIni->get('upload_max_filesize');
         $parsedUploadMaxFileSize = $this->parseFileSizeToMb($uploadMaxFileSize);
 
-        if($parsedUploadMaxFileSize >= $this->maxUploadSizeInMb) {
+        if ($parsedUploadMaxFileSize >= $this->maxUploadSizeInMb) {
             if (!$this->allowGreaterValue && $parsedUploadMaxFileSize > $this->maxUploadSizeInMb) {
                 return Result::make()
                     ->appendMeta(['upload_max_filesize' => $uploadMaxFileSize])
                     ->failed("upload_max_filesize is too high: {$uploadMaxFileSize}");
             }
 
+            if ($this->maxValueInMb !== null && $parsedUploadMaxFileSize > $this->maxValueInMb) {
+                return Result::make()
+                    ->appendMeta(['upload_max_filesize' => $uploadMaxFileSize])
+                    ->failed("upload_max_filesize is too high: {$uploadMaxFileSize} (should be at most {$this->maxValueInMb}M)");
+            }
+
             return Result::make()
                 ->appendMeta([
                     'upload_max_filesize' => $uploadMaxFileSize,
-                    'is_upload_greater_than_expected' => $parsedUploadMaxFileSize > $this->maxUploadSizeInMb
+                    'is_upload_greater_than_expected' => $parsedUploadMaxFileSize > $this->maxUploadSizeInMb,
                 ])
                 ->ok("upload_max_filesize: {$uploadMaxFileSize}");
 
@@ -76,22 +85,28 @@ class PhpUploadConfigCheck extends Check {
             ->failed("upload_max_filesize is incorrect: {$uploadMaxFileSize} (should be {$this->maxUploadSizeInMb}M)");
     }
 
-
-    protected function checkPostMaxSize(): Result {
+    protected function checkPostMaxSize(): Result
+    {
         $postMaxSize = $this->phpIni->get('post_max_size');
         $parsedPostMaxSize = $this->parseFileSizeToMb($postMaxSize);
 
-        if($parsedPostMaxSize >= $this->postMaxSizeInMb) {
+        if ($parsedPostMaxSize >= $this->postMaxSizeInMb) {
             if (!$this->allowGreaterValue && $parsedPostMaxSize > $this->postMaxSizeInMb) {
                 return Result::make()
                     ->appendMeta(['post_max_size' => $postMaxSize])
                     ->failed("post_max_size is too high: {$postMaxSize}");
             }
 
+            if ($this->maxValueInMb !== null && $parsedPostMaxSize > $this->maxValueInMb) {
+                return Result::make()
+                    ->appendMeta(['post_max_size' => $postMaxSize])
+                    ->failed("post_max_size is too high: {$postMaxSize} (should be at most {$this->maxValueInMb}M)");
+            }
+
             return Result::make()
                 ->appendMeta([
                     'post_max_size' => $postMaxSize,
-                    'is_post_greater_than_expected' => $parsedPostMaxSize > $this->postMaxSizeInMb
+                    'is_post_greater_than_expected' => $parsedPostMaxSize > $this->postMaxSizeInMb,
                 ])
                 ->ok("post_max_size: {$postMaxSize}");
 
@@ -105,20 +120,22 @@ class PhpUploadConfigCheck extends Check {
     public function setMaxUploadSizeInMb(int $maxUploadSizeInMb): self
     {
         $this->maxUploadSizeInMb = $maxUploadSizeInMb;
+
         return $this;
     }
 
     public function setPostMaxSizeInMb(int $postMaxSizeInMb): self
     {
         $this->postMaxSizeInMb = $postMaxSizeInMb;
+
         return $this;
     }
 
-    public function allowGreaterValue(): self
+    public function allowGreaterValue(bool $allow = true, ?int $max = null): self
     {
-        $this->allowGreaterValue = true;
+        $this->allowGreaterValue = $allow;
+        $this->maxValueInMb = $max;
+
         return $this;
     }
-
-
 }
